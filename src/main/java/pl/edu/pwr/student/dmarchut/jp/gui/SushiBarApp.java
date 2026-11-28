@@ -8,6 +8,7 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 public class SushiBarApp extends Application {
     private final BoardPane boardPane = new BoardPane();
     private final TextArea threadMonitorArea = new TextArea();
+    private ConfigPanel configPanel;
 
     private SushiBelt belt;
     private Creator creator;
@@ -36,16 +38,20 @@ public class SushiBarApp extends Application {
         Button stopBtn = new Button("Stop");
         stopBtn.setDisable(true);
 
+        configPanel = new ConfigPanel(this::renderPreviewFromConfig);
+
         startBtn.setOnAction(e -> {
             startSimulation();
             startBtn.setDisable(true);
             stopBtn.setDisable(false);
+            configPanel.setDisable(true);
         });
 
         stopBtn.setOnAction(e -> {
             stopSimulation();
             stopBtn.setDisable(true);
             startBtn.setDisable(false);
+            configPanel.setDisable(false);
         });
 
         HBox topBar = new HBox(10, startBtn, stopBtn);
@@ -63,29 +69,40 @@ public class SushiBarApp extends Application {
                 "[a..l] Wolne miejsce   [X, Y] Kucharz   [X!] Kucharz czeka (zajęty tor)");
         legend.setPadding(new Insets(10, 12, 12, 12));
 
+        ScrollPane centerScroll = new ScrollPane(boardPane);
+        centerScroll.setFitToWidth(true);
+        centerScroll.setFitToHeight(true);
+        centerScroll.setStyle("-fx-background-color: transparent");
+
         BorderPane root = new BorderPane();
         root.setTop(topBar);
-        root.setCenter(boardPane);
+        root.setLeft(configPanel);
+        root.setCenter(centerScroll);
         root.setRight(rightPanel);
         root.setBottom(legend);
-        BorderPane.setMargin(boardPane, new Insets(0, 0, 12, 12));
 
-        boardPane.render(new SushiBelt(SimulationConfig.defaultConfig()).getSnapshot());
+        renderPreviewFromConfig();
 
         primaryStage.setTitle("Symulator Sushi Baru - Wielowątkowość");
-        primaryStage.setScene(new Scene(root, 880, 520));
+        primaryStage.setScene(new Scene(root, 1200, 700));
         primaryStage.setOnCloseRequest(e -> stopSimulation());
         primaryStage.show();
     }
 
-    private void startSimulation() {
-        SimulationConfig config = SimulationConfig.defaultConfig();
-        belt = new SushiBelt(config);
-        creator = new Creator(belt, config);
+    private void renderPreviewFromConfig() {
+        SimulationConfig previewConfig = configPanel.buildConfig();
+        boardPane.render(new SushiBelt(previewConfig).getSnapshot());
+    }
 
-        belt.setOnUpdateListener(() -> Platform.runLater(() -> {
-            if(belt != null) {
-                boardPane.render(belt.getSnapshot());
+    private void startSimulation() {
+        SimulationConfig config = configPanel.buildConfig();
+        final SushiBelt currentBelt = new SushiBelt(config);
+        belt = currentBelt;
+        creator = new Creator(currentBelt, config);
+
+        currentBelt.setOnUpdateListener(() -> Platform.runLater(() -> {
+            if(belt == currentBelt) {
+                boardPane.render(currentBelt.getSnapshot());
             }
         }));
 
@@ -117,11 +134,11 @@ public class SushiBarApp extends Application {
 
         StringBuilder sb = new StringBuilder();
         if(creatorThread != null) {
-            sb.append(String.format("%-16s -> %s%n", creatorThread.getName(), creatorThread.getState()));
+            sb.append(String.format("%-18s -> %s%n", creatorThread.getName(), creatorThread.getState()));
         }
 
         String threadsText = creator.getManagedThreads().stream()
-                .map(t -> String.format("%-16s -> %s", t.getName(), t.getState()))
+                .map(t -> String.format("%-18s -> %s", t.getName(), t.getState()))
                 .collect(Collectors.joining("\n"));
         sb.append(threadsText);
 

@@ -37,9 +37,10 @@ public class SushiBelt {
             seats[i] = new CustomerView(label, CustomerStatus.EMPTY, null, 0);
         }
 
+        List<Integer> validTargets = buildValidChefTargets(size);
         for(int i=0; i<config.chefCount(); i++) {
             String label = String.valueOf((char) ('X' + (i % 26)));
-            int targetIndex = (i * size) / config.chefCount();
+            int targetIndex = validTargets.get((i * validTargets.size()) / config.chefCount());
 
             chefs[i] = new ChefView(label, targetIndex, ChefStatus.IDLE, null);
         }
@@ -115,6 +116,36 @@ public class SushiBelt {
         return true;
     }
 
+    private List<Integer> buildValidChefTargets(int beltSize) {
+        int height = Math.max(3, (beltSize / 4) + 1);
+        int width = Math.max(3, (beltSize - 2 * (height - 2)) / 2);
+
+        List<Integer> targets = new ArrayList<>();
+        if(width <= 3 || height <= 3) {
+            targets.add(1);
+            return targets;
+        }
+
+        for (int i=1; i<=width-3; i++) {
+            targets.add(i);
+        }
+        for (int i=width; i<=width+height-4; i++) {
+            targets.add(i);
+        }
+
+        int bottomStart = width + (height - 2);
+        for (int i=bottomStart+1; i<=bottomStart+width-3; i++) {
+            targets.add(i);
+        }
+
+        int leftStart = 2 * width + (height - 2);
+        for (int i=leftStart; i<=leftStart+height-4; i++) {
+            targets.add(i);
+        }
+
+        return targets;
+    }
+
     /** Run when Creator wants to put new Customer to an available seat */
     public int tryOccupySeat(int totalDishes, DishType firstDesiredDish) {
         int chosen = -1;
@@ -185,12 +216,6 @@ public class SushiBelt {
                     List.of(chefs.clone()),
                     List.of(seats.clone())
             );
-        }
-    }
-
-    public int getChefTargetIndex(int chefId) {
-        synchronized (monitor) {
-            return chefs[chefId].targetBeltIndex();
         }
     }
 

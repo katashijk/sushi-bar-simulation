@@ -11,14 +11,12 @@ import pl.edu.pwr.student.dmarchut.jp.model.chef.ChefStatus;
 import pl.edu.pwr.student.dmarchut.jp.model.chef.ChefView;
 import pl.edu.pwr.student.dmarchut.jp.model.customer.CustomerStatus;
 import pl.edu.pwr.student.dmarchut.jp.model.customer.CustomerView;
-import pl.edu.pwr.student.dmarchut.jp.threads.Chef;
 
-import javax.tools.Tool;
 import java.util.HashSet;
 import java.util.Set;
 
 public class BoardPane extends StackPane {
-    private static final int CELL_SIZE = 44;
+    private static final int CELL_SIZE = 48;
     private final GridPane grid = new GridPane();
 
     public BoardPane() {
@@ -95,6 +93,10 @@ public class BoardPane extends StackPane {
                 outer:
                 for(int r=2; r<=height-1; r++) {
                     for(int c=2; c<=width-1; c++) {
+                        if(r != 2 && r != height - 1 && c != 2 && c != width - 1){
+                            continue;
+                        }
+
                         String candidate = c + "," + r;
                         if(!occupiedInside.contains(candidate)) {
                             prefCol = c;
@@ -139,7 +141,8 @@ public class BoardPane extends StackPane {
                 textColor = "#64748b";
             }
             case WAITING -> {
-                text = "?";
+                String dish = String.valueOf(seat.currentDish().getSymbol());
+                text = "?" + dish;
                 bgColor = "#fef08a";
             }
             case EATING -> {
@@ -185,7 +188,7 @@ public class BoardPane extends StackPane {
         label.setMinSize(CELL_SIZE, CELL_SIZE);
         label.setPrefSize(CELL_SIZE, CELL_SIZE);
         label.setMaxSize(CELL_SIZE, CELL_SIZE);
-        label.setStyle(String.format("-fx-font-family: 'Monospaced'; -fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: %s;" +
+        label.setStyle(String.format("-fx-font-family: 'Monospaced'; -fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: %s;" +
                 "-fx-background-color: %s; -fx-background-radius: 6;" +
                 "-fx-border-color: %s; -fx-border-radius: 6;", bgColor, textColor, borderColor));
 
