@@ -6,6 +6,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import pl.edu.pwr.student.dmarchut.jp.model.SimulationConfig;
 
+/** Side panel allowing simulation parameters to be configured before startup */
 public class ConfigPanel extends VBox {
     private final Spinner<Integer> beltSizeSpinner;
     private final Spinner<Integer> engineDelaySpinner;
@@ -27,17 +28,17 @@ public class ConfigPanel extends VBox {
         this.onPreviewChange = onPreviewChange;
         SimulationConfig def = SimulationConfig.defaultConfig();
 
-        beltSizeSpinner = createSpinner(8, 32, def.beltSize(), 4);
-        engineDelaySpinner = createSpinner(100, 3000, def.engineDelay(), 50);
+        beltSizeSpinner = createSpinner(8, 64, def.beltSize(), 4);
+        engineDelaySpinner = createSpinner(100, 10000, def.engineDelay(), 50);
 
         int initialMaxChefs = calculateMaxChefs(def.beltSize());
         chefCountSpinner = createSpinner(1, initialMaxChefs, def.chefCount(), 1);
-        chefMinPrepSpinner = createSpinner(200, 5000, def.chefMinPrepDelay(), 100);
-        chefMaxPrepSpinner = createSpinner(200, 8000, def.chefMaxPrepDelay(), 100);
+        chefMinPrepSpinner = createSpinner(200, 10000, def.chefMinPrepDelay(), 100);
+        chefMaxPrepSpinner = createSpinner(200, 20000, def.chefMaxPrepDelay(), 100);
 
-        customerSpawnSpinner = createSpinner(200, 5000, def.customerSpawnDelay(), 100);
-        customerMinEatSpinner = createSpinner(200, 5000, def.customerMinEatDelay(), 100);
-        customerMaxEatSpinner = createSpinner(200, 8000, def.customerMaxEatDelay(), 100);
+        customerSpawnSpinner = createSpinner(200, 100000, def.customerSpawnDelay(), 100);
+        customerMinEatSpinner = createSpinner(200, 50000, def.customerMinEatDelay(), 100);
+        customerMaxEatSpinner = createSpinner(200, 150000, def.customerMaxEatDelay(), 100);
 
         dishesMinSpinner = createSpinner(1, 10, def.dishesPerCustomerMin(), 1);
         dishesMaxSpinner = createSpinner(1, 20, def.dishesPerCustomerMax(), 1);
@@ -86,6 +87,7 @@ public class ConfigPanel extends VBox {
         getChildren().addAll(title, new Separator(), form, new Separator(), resetBtn);
     }
 
+    /** Calculates the maximum number of chefs that fit directly along the inner belt edge */
     private int calculateMaxChefs(int beltSize) {
         int height = Math.max(3, (beltSize / 4) + 1);
         int width = Math.max(3, (beltSize - 2 * (height - 2)) / 2);
@@ -100,6 +102,7 @@ public class ConfigPanel extends VBox {
         return 2 * innerW + 2 * (innerH - 2);
     }
 
+    /** Builds an immutable SimulationConfig from the current spinner values */
     public SimulationConfig buildConfig() {
         int chefMin = chefMinPrepSpinner.getValue();
         int chefMax = Math.max(chefMin, chefMaxPrepSpinner.getValue());
@@ -124,6 +127,7 @@ public class ConfigPanel extends VBox {
         );
     }
 
+    /** Resets all parameter controls back to default values */
     private void resetToDefault() {
         SimulationConfig def = SimulationConfig.defaultConfig();
 
@@ -144,6 +148,7 @@ public class ConfigPanel extends VBox {
         notifyPreview();
     }
 
+    /** Updates the chef count upper bound when belt size changes */
     private void updateMaxChefs(int beltSize) {
         int maxChefs = calculateMaxChefs(beltSize);
         SpinnerValueFactory.IntegerSpinnerValueFactory factory = (SpinnerValueFactory.IntegerSpinnerValueFactory) chefCountSpinner.getValueFactory();
@@ -154,6 +159,7 @@ public class ConfigPanel extends VBox {
         }
     }
 
+    /** Keeps a min/max spinner pair consistent so min never exceeds max */
     private void linkMinMax(Spinner<Integer> minSpinner, Spinner<Integer> maxSpinner) {
         minSpinner.valueProperty().addListener((obs, o, newMin) -> {
             if(newMin > maxSpinner.getValue()) {
@@ -168,6 +174,7 @@ public class ConfigPanel extends VBox {
         });
     }
 
+    /** Creates a non-editable integer spinner with fixed width */
     private Spinner<Integer> createSpinner(int min, int max, int initial, int step) {
         Spinner<Integer> spinner = new Spinner<>(min, max, initial, step);
         spinner.setPrefWidth(95);
@@ -176,6 +183,7 @@ public class ConfigPanel extends VBox {
         return spinner;
     }
 
+    /** Adds a bold section header row to the form grid */
     private int addSectionHeader(GridPane grid, int row, String text) {
         Label header = new Label(text);
         header.setStyle("-fx-font-weight: bold; -fx-text-fill: #334155; -fx-padding: 6 0 2 0;");
@@ -184,6 +192,7 @@ public class ConfigPanel extends VBox {
         return row + 1;
     }
 
+    /** Adds a labeled spinner row to the form grid */
     private int addRow(GridPane grid, int row, String text, Spinner<Integer> spinner) {
         grid.add(new Label(text), 0, row);
         grid.add(spinner, 1, row);
@@ -191,6 +200,7 @@ public class ConfigPanel extends VBox {
         return row + 1;
     }
 
+    /** Triggers the preview callback when layout parameters change */
     private void notifyPreview() {
         if(onPreviewChange != null) {
             onPreviewChange.run();

@@ -22,9 +22,9 @@ public record SimulationConfig(
     /** Default Simulation Config */
     public static SimulationConfig defaultConfig() {
         return new SimulationConfig(
-                450, 12,
-                2, 900, 2000,
-                1200, 2500, 1000,
+                2000, 12,
+                2, 3000, 8000,
+                2000, 10000, 5000,
                 2, 4
         );
     }

@@ -15,6 +15,7 @@ import pl.edu.pwr.student.dmarchut.jp.model.customer.CustomerView;
 import java.util.HashSet;
 import java.util.Set;
 
+/** JavaFX grid component rendering customers, belt slots, and chefs in 2D */
 public class BoardPane extends StackPane {
     private static final int CELL_SIZE = 48;
     private final GridPane grid = new GridPane();
@@ -28,6 +29,7 @@ public class BoardPane extends StackPane {
                 "-fx-border-color: #cbd5e1; -fx-border-radius: 8;");
     }
 
+    /** Clears and redraws the 2D board from the given simulation snapshot */
     public void render(SimulationSnapshot snapshot) {
         grid.getChildren().clear();
         if(snapshot == null) return;
@@ -113,6 +115,7 @@ public class BoardPane extends StackPane {
         }
     }
 
+    /** Creates a styled cell representing single belt slot */
     private Label createBeltCell(DishType dish) {
         String text, bg;
 
@@ -131,6 +134,7 @@ public class BoardPane extends StackPane {
         return baseCell(text, bg, "#1e3a8a", "#60a5fa");
     }
 
+    /** Creates a styled cell representing a customer seat and its current status */
     private Label createCustomerCell(CustomerView seat) {
         String text, bgColor, textColor = "#0f172a";
 
@@ -165,6 +169,7 @@ public class BoardPane extends StackPane {
         return label;
     }
 
+    /** Creates a styled cell representing a chef and its current status */
     private Label createChefCell(ChefView chef) {
         String text, bg;
 
@@ -182,6 +187,7 @@ public class BoardPane extends StackPane {
         return baseCell(text, bg, "#581c87", "#a855f7");
     }
 
+    /** Builds a fixed-size square label cell with consissten typography and colors */
     private Label baseCell(String text, String bgColor, String textColor, String borderColor) {
         Label label = new Label(text);
         label.setAlignment(Pos.CENTER);
@@ -195,6 +201,7 @@ public class BoardPane extends StackPane {
         return label;
     }
 
+    /** Clamps value to he inclusive [min, max] range */
     private int clamp(int value, int min, int max) {
         return Math.max(min, Math.min(max, value));
     }

@@ -3,6 +3,7 @@ package pl.edu.pwr.student.dmarchut.jp.threads;
 import pl.edu.pwr.student.dmarchut.jp.model.SimulationConfig;
 import pl.edu.pwr.student.dmarchut.jp.sync.SushiBelt;
 
+/** Worker thread responsible for rotating the belt at fixed interval */
 public class BeltEngine implements Runnable {
     private final SushiBelt belt;
     private final SimulationConfig config;
@@ -12,6 +13,7 @@ public class BeltEngine implements Runnable {
         this.config = config;
     }
 
+    /** Periodically sleeps and shifts all dishes along the belt */
     @Override
     public void run() {
         try {

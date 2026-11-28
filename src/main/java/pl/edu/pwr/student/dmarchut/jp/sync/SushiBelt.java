@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-/** PLACEHOLDER */
+/** Shared sushi bar state acting as monitor for threads */
 public class SushiBelt {
     private final int size;
     private final DishType[] belt;
@@ -25,6 +25,7 @@ public class SushiBelt {
     private volatile boolean running = true;
     private Runnable onUpdateListener;
 
+    /** Initialzes belt slots, customer seats, and chef stations */
     public SushiBelt(SimulationConfig config) {
         this.size = config.beltSize();
         this.belt = new DishType[size];
@@ -46,12 +47,12 @@ public class SushiBelt {
         }
     }
 
-    /** PLACEHOLDER */
+    /** Registers a listener invoked after belt state updates */
     public void setOnUpdateListener(Runnable listener) {
         this.onUpdateListener = listener;
     }
 
-    /** PLACEHOLDER */
+    /** Triggers the UI update callback outside the synchronized block */
     private void notifyListener() {
         if(onUpdateListener != null) {
             onUpdateListener.run();
@@ -80,6 +81,37 @@ public class SushiBelt {
             chefs[chefId] = new ChefView(current.chefLabel(), current.targetBeltIndex(), status, dish);
         }
         notifyListener();
+    }
+
+    /** Computes belt indices adjacent to the inner perimeter, excluding belt corners */
+    private List<Integer> buildValidChefTargets(int beltSize) {
+        int height = Math.max(3, (beltSize / 4) + 1);
+        int width = Math.max(3, (beltSize - 2 * (height - 2)) / 2);
+
+        List<Integer> targets = new ArrayList<>();
+        if(width <= 3 || height <= 3) {
+            targets.add(1);
+            return targets;
+        }
+
+        for (int i=1; i<=width-3; i++) {
+            targets.add(i);
+        }
+        for (int i=width; i<=width+height-4; i++) {
+            targets.add(i);
+        }
+
+        int bottomStart = width + (height - 2);
+        for (int i=bottomStart+1; i<=bottomStart+width-3; i++) {
+            targets.add(i);
+        }
+
+        int leftStart = 2 * width + (height - 2);
+        for (int i=leftStart; i<=leftStart+height-4; i++) {
+            targets.add(i);
+        }
+
+        return targets;
     }
 
     /** Run when Chef wants to put the cooked dish on the belt */
@@ -114,36 +146,6 @@ public class SushiBelt {
 
         notifyListener();
         return true;
-    }
-
-    private List<Integer> buildValidChefTargets(int beltSize) {
-        int height = Math.max(3, (beltSize / 4) + 1);
-        int width = Math.max(3, (beltSize - 2 * (height - 2)) / 2);
-
-        List<Integer> targets = new ArrayList<>();
-        if(width <= 3 || height <= 3) {
-            targets.add(1);
-            return targets;
-        }
-
-        for (int i=1; i<=width-3; i++) {
-            targets.add(i);
-        }
-        for (int i=width; i<=width+height-4; i++) {
-            targets.add(i);
-        }
-
-        int bottomStart = width + (height - 2);
-        for (int i=bottomStart+1; i<=bottomStart+width-3; i++) {
-            targets.add(i);
-        }
-
-        int leftStart = 2 * width + (height - 2);
-        for (int i=leftStart; i<=leftStart+height-4; i++) {
-            targets.add(i);
-        }
-
-        return targets;
     }
 
     /** Run when Creator wants to put new Customer to an available seat */
@@ -209,6 +211,7 @@ public class SushiBelt {
         notifyListener();
     }
 
+    /** Returns an immutable snapshot of the current simulation state */
     public SimulationSnapshot getSnapshot() {
         synchronized (monitor) {
             return new SimulationSnapshot(
@@ -219,10 +222,12 @@ public class SushiBelt {
         }
     }
 
+    /** Returns whether the simulation is still active */
     public boolean isRunning() {
         return running;
     }
 
+    /** Stops the simulation and wakes up all threads waiting on the monitor */
     public void shutdown() {
         synchronized (monitor) {
             running = false;

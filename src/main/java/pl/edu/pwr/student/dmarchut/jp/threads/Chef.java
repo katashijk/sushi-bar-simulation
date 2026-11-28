@@ -7,6 +7,7 @@ import pl.edu.pwr.student.dmarchut.jp.sync.SushiBelt;
 
 import java.util.concurrent.ThreadLocalRandom;
 
+/** Worker thread representing a chef continuously preparing and placing dishes */
 public class Chef implements Runnable {
     private final int chefId;
     private final SushiBelt belt;
@@ -18,7 +19,7 @@ public class Chef implements Runnable {
         this.config = config;
     }
 
-
+    /** Picks a random dish, prepares it, and waits until its belt slot is free */
     @Override
     public void run() {
         try {
@@ -38,6 +39,7 @@ public class Chef implements Runnable {
         }
     }
 
+    /** Returns a random delay in miliseconds within [min, max] */
     private int randomDelay(int min, int max) {
         int safeMax = Math.max(min, max);
         return ThreadLocalRandom.current().nextInt(min, safeMax + 1);

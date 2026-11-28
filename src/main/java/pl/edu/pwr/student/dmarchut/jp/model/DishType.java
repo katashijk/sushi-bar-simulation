@@ -4,27 +4,22 @@ import java.util.concurrent.ThreadLocalRandom;
 
 /** Represents sushi variants (via ASCII or text) */
 public enum DishType {
-    NIGIRI('▓', "Nigiri"),
-    ONIGIRI('Â', "Onigiri"),
-    SASHIMI('█', "Sashimi"),
-    MAKI('¤', "Maki");
+    NIGIRI('▓'),
+    ONIGIRI('Â'),
+    SASHIMI('█'),
+    MAKI('¤');
 
     private final char symbol;
-    private final String displayName;
 
-    DishType(char symbol, String displayName) {
+    DishType(char symbol) {
         this.symbol = symbol;
-        this.displayName = displayName;
     }
 
     public char getSymbol() {
         return symbol;
     }
 
-    public String getDisplayName() {
-        return displayName;
-    }
-
+    /** Returns a random dish from specified dishes */
     public static DishType random() {
         DishType[] values = values();
         return values[ThreadLocalRandom.current().nextInt(values.length)];

@@ -22,6 +22,7 @@ import pl.edu.pwr.student.dmarchut.jp.threads.Creator;
 
 import java.util.stream.Collectors;
 
+/** Main JavaFX application combining configuration, 2D board view, and thread monitor */
 public class SushiBarApp extends Application {
     private final BoardPane boardPane = new BoardPane();
     private final TextArea threadMonitorArea = new TextArea();
@@ -32,6 +33,7 @@ public class SushiBarApp extends Application {
     private Thread creatorThread;
     private Timeline threadMonitorTimeline;
 
+    /** Initializes the window layout, controls, and event handlers */
     @Override
     public void start(Stage primaryStage) {
         Button startBtn = new Button("Start");
@@ -89,11 +91,13 @@ public class SushiBarApp extends Application {
         primaryStage.show();
     }
 
+    /** Renders an initial board preview using the current ConfigPanel settings */
     private void renderPreviewFromConfig() {
         SimulationConfig previewConfig = configPanel.buildConfig();
         boardPane.render(new SushiBelt(previewConfig).getSnapshot());
     }
 
+    /** Starts the simulation threads and live thread-state monitoring */
     private void startSimulation() {
         SimulationConfig config = configPanel.buildConfig();
         final SushiBelt currentBelt = new SushiBelt(config);
@@ -114,6 +118,7 @@ public class SushiBarApp extends Application {
         threadMonitorTimeline.play();
     }
 
+    /** Stops the thread monitor timer and terminates all running simulation threads */
     private void stopSimulation() {
         if(threadMonitorTimeline != null) {
             threadMonitorTimeline.stop();
@@ -129,6 +134,7 @@ public class SushiBarApp extends Application {
         }
     }
 
+    /** Refreshes the text area showing current states of all active threads */
     private void updateThreadMonitor() {
         if(creator == null) return;
 

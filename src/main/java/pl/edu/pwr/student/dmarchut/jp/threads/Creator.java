@@ -10,6 +10,7 @@ import java.util.Queue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
+/** Spawner thread starting the engine, chefs, and periodic customer threads */
 public class Creator implements Runnable {
     private final SushiBelt belt;
     private final SimulationConfig config;
@@ -20,6 +21,7 @@ public class Creator implements Runnable {
         this.config = config;
     }
 
+    /** Starts engine and chef threads, then spawns customers onto free seats */
     @Override
     public void run() {
         Thread engineThread = new Thread(new BeltEngine(belt, config), "Engine");
@@ -57,6 +59,7 @@ public class Creator implements Runnable {
         }
     }
 
+    /** Generates a random ordered queue of dishes for a new customer */
     private Queue<DishType> generateWishList() {
         int min = config.dishesPerCustomerMin();
         int max = config.dishesPerCustomerMax();
@@ -70,10 +73,12 @@ public class Creator implements Runnable {
         return list;
     }
 
+    /** Returns the list of currently tracked simulation threads */
     public List<Thread> getManagedThreads() {
         return managedThreads;
     }
 
+    /** Shuts down the belt and interrupts all managed threads */
     public void stopAll() {
         belt.shutdown();
         for(Thread t : managedThreads) {
