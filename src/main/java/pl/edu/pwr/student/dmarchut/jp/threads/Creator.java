@@ -22,7 +22,7 @@ public class Creator implements Runnable {
 
     @Override
     public void run() {
-        Thread engineThread = new Thread(new BeltEngine(belt, config, "Engine"));
+        Thread engineThread = new Thread(new BeltEngine(belt, config), "Engine");
         managedThreads.add(engineThread);
         engineThread.start();
 
